@@ -18,6 +18,22 @@ const passengerCredsSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  bookings: [
+    {
+      tripId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Trip",
+      },
+      seatsBooked: {
+        type: Number,
+        required: true,
+      },
+      bookedAt: {
+        type: Date,
+        default: Date.now,
+      },
+    },
+  ],
 });
 
 const PassengerCreds =
