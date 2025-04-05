@@ -8,8 +8,9 @@ router.post("/chatbot", async (req, res) => {
 
   try {
     const response = await axios.post(
-      "http://localhost:5005/webhooks/rest/webhook",
+      "http://192.168.8.140:5005/webhooks/rest/webhook", // 🔁 Use actual IP here
       {
+        sender: "user", // 👈 Add sender if you want to track by user or rider
         message,
       }
     );
