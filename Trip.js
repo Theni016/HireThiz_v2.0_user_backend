@@ -28,6 +28,7 @@ const TripSchema = new mongoose.Schema({
       name: String,
       phone: String,
       seatsBooked: Number,
+      totalAmount: Number,
     },
   ],
 });

@@ -42,19 +42,22 @@ router.post("/book-trip", async (req, res) => {
         .json({ success: false, message: "Passenger not found" });
     }
 
+    const totalAmount = seatsBooked * trip.pricePerSeat;
+
     // Save booking info inside trip
     trip.bookings.push({
       passengerId: userId,
       name: username,
       phone,
       seatsBooked,
+      totalAmount,
     });
 
     trip.seatsAvailable -= seatsBooked;
     await trip.save();
 
     // Optional: Save booking in passenger's record (if needed)
-    passenger.bookings.push({ tripId, seatsBooked });
+    passenger.bookings.push({ tripId, seatsBooked, totalAmount });
     await passenger.save();
 
     res.status(200).json({ success: true, message: "Booking successful" });
