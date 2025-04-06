@@ -2,14 +2,8 @@
 const mongoose = require("mongoose");
 
 const TripSchema = new mongoose.Schema({
-  passenger: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "PassengerCreds",
-    required: true,
-  },
   driverName: { type: String, required: true },
   vehicle: { type: String, required: true },
-  passengers: [{ type: mongoose.Schema.Types.ObjectId, ref: "PassengerCreds" }],
   startLocation: {
     latitude: Number,
     longitude: Number,
@@ -24,6 +18,18 @@ const TripSchema = new mongoose.Schema({
   pricePerSeat: { type: Number, required: true },
   date: { type: Date, required: true },
   description: { type: String },
+
+  bookings: [
+    {
+      passengerId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "PassengerCreds",
+      },
+      name: String,
+      phone: String,
+      seatsBooked: Number,
+    },
+  ],
 });
 
 module.exports = mongoose.model("Trip", TripSchema);
