@@ -32,6 +32,10 @@ const passengerCredsSchema = new mongoose.Schema({
         type: Date,
         default: Date.now,
       },
+      totalAmount: {
+        type: Number,
+        required: true,
+      },
     },
   ],
 });
