@@ -36,6 +36,14 @@ const passengerCredsSchema = new mongoose.Schema({
         type: Number,
         required: true,
       },
+      hasRated: {
+        type: Boolean,
+        default: false,
+      },
+      hasReported: {
+        type: Boolean,
+        default: false,
+      },
     },
   ],
 });

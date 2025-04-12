@@ -2,6 +2,7 @@ const express = require("express");
 const PassengerCreds = require("./models/PassengerCreds");
 const router = express.Router();
 const Trip = require("./Trip");
+const authMiddleware = require("./middleware/authMiddleware");
 
 router.get("/trips", async (req, res) => {
   try {
@@ -16,10 +17,8 @@ router.get("/trips", async (req, res) => {
   }
 });
 
-module.exports = router;
-
-router.post("/book-trip", async (req, res) => {
-  const { tripId, userId, username, phone, seatsBooked } = req.body;
+router.post("/book-trip", authMiddleware, async (req, res) => {
+  const { tripId, seatsBooked } = req.body;
 
   try {
     const trip = await Trip.findById(tripId);
@@ -35,20 +34,20 @@ router.post("/book-trip", async (req, res) => {
         .json({ success: false, message: "Not enough seats available" });
     }
 
-    const passenger = await PassengerCreds.findById(userId);
+    const passenger = await PassengerCreds.findById(req.user.id);
     if (!passenger) {
       return res
         .status(404)
         .json({ success: false, message: "Passenger not found" });
     }
 
+    const { username, phoneNumber } = passenger;
     const totalAmount = seatsBooked * trip.pricePerSeat;
 
-    // Save booking info inside trip
     trip.bookings.push({
-      passengerId: userId,
+      passengerId: passenger._id,
       name: username,
-      phone,
+      phone: phoneNumber,
       seatsBooked,
       totalAmount,
     });
@@ -56,7 +55,6 @@ router.post("/book-trip", async (req, res) => {
     trip.seatsAvailable -= seatsBooked;
     await trip.save();
 
-    // Optional: Save booking in passenger's record (if needed)
     passenger.bookings.push({ tripId, seatsBooked, totalAmount });
     await passenger.save();
 
@@ -66,3 +64,38 @@ router.post("/book-trip", async (req, res) => {
     res.status(500).json({ success: false, message: "Server error" });
   }
 });
+
+router.get("/booked-trips", authMiddleware, async (req, res) => {
+  try {
+    const passengerId = req.user.id;
+    const passenger = await PassengerCreds.findById(passengerId);
+    console.log("Passenger lookup by req.user.id:", req.user.id);
+    console.log("Passenger found:", passenger);
+
+    if (!passenger) {
+      return res.status(404).json({ message: "Passenger not found" });
+    }
+
+    const bookingsWithTrips = (
+      await Promise.all(
+        passenger.bookings.map(async (booking) => {
+          console.log("Looking for trip with ID:", booking.tripId);
+          const trip = await Trip.findById(booking.tripId);
+
+          if (!trip) {
+            console.warn("No trip found for tripId:", booking.tripId);
+          }
+
+          return { trip, booking };
+        })
+      )
+    ).filter(Boolean);
+
+    res.json(bookingsWithTrips);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Server error");
+  }
+});
+
+module.exports = router;
