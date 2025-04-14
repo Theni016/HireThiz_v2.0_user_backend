@@ -2,6 +2,11 @@
 const mongoose = require("mongoose");
 
 const TripSchema = new mongoose.Schema({
+  driver: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "DriverCreds",
+    required: true,
+  },
   driverName: { type: String, required: true },
   vehicle: { type: String, required: true },
   startLocation: {
@@ -18,7 +23,6 @@ const TripSchema = new mongoose.Schema({
   pricePerSeat: { type: Number, required: true },
   date: { type: Date, required: true },
   description: { type: String },
-
   bookings: [
     {
       passengerId: {
@@ -29,6 +33,10 @@ const TripSchema = new mongoose.Schema({
       phone: String,
       seatsBooked: Number,
       totalAmount: Number,
+      hasRated: {
+        type: Boolean,
+        default: false,
+      },
     },
   ],
 });
